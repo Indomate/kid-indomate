@@ -54,6 +54,8 @@ export interface Order {
   user_id: string;
   total_amount: number;
   status: string;
+  payment_method?: string;
+  payment_status?: string;
   created_at: string;
 }
 

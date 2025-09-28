@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingCart, ArrowLeft } from 'lucide-react';
+import { Heart, ShoppingCart, ArrowLeft, MessageCircle } from 'lucide-react';
 import { Product } from '../types/product';
 import { ProductCard } from '../components/shared/ProductCard';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../hooks/useAuth';
+import { useToast } from '../hooks/useToast';
+import { Toast } from '../components/shared/Toast';
 
 export const ProductDetail: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast, showToast, hideToast } = useToast();
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isLiked, setIsLiked] = useState(false);
@@ -87,8 +90,10 @@ export const ProductDetail: React.FC = () => {
           });
         setIsLiked(true);
       }
+      showToast(isLiked ? 'Removed from wishlist' : 'Added to wishlist', 'success');
     } catch (error) {
       console.error('Error updating wishlist:', error);
+      showToast('Error updating wishlist', 'error');
     }
   };
 
@@ -121,13 +126,21 @@ export const ProductDetail: React.FC = () => {
             quantity: 1,
           });
       }
+      showToast('Added to cart successfully!', 'success');
     } catch (error) {
       console.error('Error adding to cart:', error);
+      showToast('Error adding to cart', 'error');
     } finally {
       setIsAddingToCart(false);
     }
   };
 
+  const handleWhatsAppQuery = () => {
+    const message = `Hey, I want to know about ${product?.name} - ${product?.category} - Rs. ${product?.price.toFixed(2)}`;
+    const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 flex items-center justify-center">
@@ -145,13 +158,15 @@ export const ProductDetail: React.FC = () => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100"
-    >
+    <>
+      <Toast {...toast} onClose={hideToast} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.5 }}
+        className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100"
+      >
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <motion.button
@@ -237,10 +252,21 @@ export const ProductDetail: React.FC = () => {
               whileTap={{ scale: 0.95 }}
               onClick={handleAddToCart}
               disabled={isAddingToCart}
-              className="w-full bg-gradient-to-r from-green-300 to-blue-300 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 font-poppins text-lg"
+              className="w-full bg-gradient-to-r from-green-300 to-blue-300 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 font-poppins text-lg mb-4"
             >
               <ShoppingCart className="h-6 w-6" />
               <span>{isAddingToCart ? 'Adding to Cart...' : '🛍️ Add to Cart'}</span>
+            </motion.button>
+
+            {/* WhatsApp Query Button */}
+            <motion.button
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleWhatsAppQuery}
+              className="w-full bg-gradient-to-r from-green-400 to-green-600 text-white font-bold py-4 px-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center space-x-3 font-poppins text-lg"
+            >
+              <MessageCircle className="h-6 w-6" />
+              <span>Any Query?</span>
             </motion.button>
           </motion.div>
         </div>
@@ -270,6 +296,7 @@ export const ProductDetail: React.FC = () => {
           </motion.div>
         )}
       </div>
-    </motion.div>
+      </motion.div>
+    </>
   );
 };

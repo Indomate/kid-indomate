@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,8 +17,22 @@ export const useAuth = () => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setUser(session?.user ?? null);
+        
+        // Check if user is admin
+        if (session?.user) {
+          const { data: adminData } = await supabase
+            .from('admins')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+          
+          setIsAdmin(!!adminData);
+        } else {
+          setIsAdmin(false);
+        }
+        
         setLoading(false);
       }
     );
@@ -47,6 +63,7 @@ export const useAuth = () => {
 
   return {
     user,
+    isAdmin,
     loading,
     signUp,
     signIn,

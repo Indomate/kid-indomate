@@ -7,7 +7,7 @@ import { useAuth } from '../../hooks/useAuth';
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { user, signOut } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -82,6 +82,15 @@ export const Navbar: React.FC = () => {
                     <User className="h-5 w-5 text-cute-charcoal cursor-pointer hover:text-pink-500 transition-colors duration-300" />
                   </motion.div>
                 </Link>
+                {isAdmin && (
+                  <Link to="/admin">
+                    <motion.div whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.9 }}>
+                      <span className="text-xs bg-gradient-to-r from-purple-400 to-pink-400 text-white px-2 py-1 rounded-full font-bold">
+                        Admin
+                      </span>
+                    </motion.div>
+                  </Link>
+                )}
               </>
             ) : (
               <Link to="/auth">
@@ -148,6 +157,11 @@ export const Navbar: React.FC = () => {
                   <Link to="/notifications" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-medium font-poppins text-cute-charcoal hover:bg-cute-baby-pink hover:bg-opacity-50">
                     Notifications
                   </Link>
+                  {isAdmin && (
+                    <Link to="/admin" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-medium font-poppins text-cute-charcoal hover:bg-cute-baby-pink hover:bg-opacity-50">
+                      Admin Panel
+                    </Link>
+                  )}
                 </>
               ) : (
                 <Link to="/auth" onClick={() => setIsOpen(false)} className="block px-3 py-2 rounded-md text-sm font-medium font-poppins text-cute-charcoal hover:bg-cute-baby-pink hover:bg-opacity-50">

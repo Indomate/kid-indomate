@@ -14,6 +14,7 @@ import { Profile } from './pages/Profile';
 import { Wishlist } from './pages/Wishlist';
 import { Cart } from './pages/Cart';
 import { Notifications } from './pages/Notifications';
+import { Admin } from './pages/Admin';
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
               <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/admin" element={<Admin />} />
             </Routes>
           </AnimatePresence>
         </main>
